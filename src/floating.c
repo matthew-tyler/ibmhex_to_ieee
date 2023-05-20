@@ -63,6 +63,12 @@ typedef union
 
 } IBM_FLOAT;
 
+double ibm_to_ieee(IBM_FLOAT num, int precision)
+{
+
+    return 0.0;
+}
+
 void checkError(int rs, char *msg)
 {
     if (rs < 0)
@@ -105,12 +111,26 @@ int main(int argc, char const *argv[])
         exit(0);
     }
 
+    IBM_FLOAT to_convert;
+
     unsigned char buffer[precision];
 
     size_t bytesRead;
 
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
     {
+
+        if (precision == 32)
+        {
+            to_convert.number = *((uint32_t *)buffer); // Cast and dereference to read out of the buffer, I think?
+        }
+        else
+        {
+            to_convert.number = *((uint64_t *)buffer);
+        }
+
+        double iee = ibm_to_ieee(to_convert, precision);
+        printf("%lf\n", iee);
     }
 
     if (ferror(file))
