@@ -22,6 +22,10 @@
  *  exponent remain the same between the two formats, fraction is considered to be the short (24 bits)
  *  form of the fraction, while long_fraction has its own field.
  *
+ *  Note: The diagram is written as big endian as is standard for the IBM System/360, and also just looks
+ *        better for the diagram imo. The union itself is set out in little endian as is more common.
+ *        The program will assume the input data is Big Endian as the etude says we are converting data
+ *        from an IBM System, but will also attempt to determine this at run time.
  *
  * Note: Each '-' denotes a bit.
  *
