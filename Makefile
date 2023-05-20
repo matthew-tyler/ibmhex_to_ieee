@@ -1,11 +1,11 @@
 CC=gcc
-CFLAGS=-I.
+CFLAGS=-lm -I.
 DEPS =
 OBJ = floating.o
 BIN_DIR = bin
 SRC_DIR = src
 INPUT_DIR = testdata
-INPUT_FILE = single.bin
+INPUT_FILE = testIBMSingle.bin
 PRECISION = -s
 DEBUG_FLAGS = -g -O0 -Wall
 

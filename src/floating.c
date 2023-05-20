@@ -7,9 +7,14 @@
 #include <string.h>
 #include <fcntl.h>
 #include <math.h>
+#include <stdbool.h>
 
+#define EXPONENT_BIAS 64
 #define SHORT_WIDTH 24
 #define LONG_WIDTH 56
+#define BASE16_TO_BASE2 4
+#define SHORT 4
+#define LONG 8
 
 /*
  * |------------------------ IBM_FLOAT Union Representation ------------------------|
@@ -27,7 +32,6 @@
  *        The program will assume the input data is Big Endian as the etude says we are converting data
  *        from an IBM System, but will also attempt to determine this at run time.
  *
- * Note: Each '-' denotes a bit.
  *
  *                                     number
  *                         |------------------------------------------------------------------------|
@@ -49,24 +53,90 @@
  *                         |------------------------------------------------------------------------|
  *
  */
-
 typedef union
 {
     uint64_t number; // Holds 64bits. Set this value with the raw binary stream.
     struct
     {
-        uint32_t fraction : 24; // The fraction of a Short IBM float
-        uint8_t exponent : 7;   // The exponent and sign bit are the same for both short and long.
-        uint8_t sign : 1;
+        uint32_t fraction : 24;  // The fraction of a Short IBM float
+        uint8_t exponent : 7;    // The exponent and sign bit are the same for both short and long.
+        uint8_t sign : 1;        // Same for both. 0 for postive, 1 for negative.
     } __attribute__((packed));   // For the compiler to not add any padding. Should work for gcc, might need to add more?
     uint64_t long_fraction : 56; // the fraction of a Long IBM float
 
 } IBM_FLOAT;
 
-double ibm_to_ieee(IBM_FLOAT num, int precision)
+/*
+
+    IBM Formula (−1)^sign *  16^(exponent - 64) * 0.significand
+    IEEE Formula (-1)^sign * 2^(exponent - bias) * 1.mantissa
+
+    16^(exponent - 64) to 2^(exponent - bias)
+    a^(bc) = (a^b)^c
+    16^(exponent - bias) = (2^4)^(exponent - bias) = (2^4)^(exponent - bias) = 2^(4*(exponent - bias))
+
+    0.significand * 2^-24  == exponent - 24;
+
+    - Subtract the exponent bias from the IBM exponent to adjust the range.
+    - Multiply the difference (exponent - bias) by the conversion factor BASE16_TO_BASE2 to convert the exponent from base 16 to base 2.
+    - Subtract the SHORT_WIDTH (in base 2)
+
+
+*/
+double ibm32_to_ieee(IBM_FLOAT num)
+{
+    int exponent = ((num.exponent - EXPONENT_BIAS) * BASE16_TO_BASE2) - SHORT_WIDTH;
+    double ieenum = ldexp(num.fraction, exponent) * pow(-1, num.sign); // ldexp is apparently a better way to do x * 2^n
+    return ieenum;
+}
+
+double ibm64_to_ieee(IBM_FLOAT num)
+{
+    int exponent = ((num.exponent - EXPONENT_BIAS) * BASE16_TO_BASE2) - LONG_WIDTH;
+    double ieenum = ldexp(num.long_fraction, exponent) * pow(-1, num.sign);
+    return ieenum;
+}
+
+void print_ibm_float_decimal(IBM_FLOAT f, int precision)
 {
 
-    return 0.0;
+    int width = SHORT_WIDTH;
+
+    if (precision == LONG)
+    {
+        width = LONG_WIDTH;
+    }
+
+    double exponent_part = pow(16, (f.exponent - EXPONENT_BIAS));
+    double fraction_part = f.fraction / pow(2, 24);
+
+    double number = pow(-1, f.sign) * exponent_part * fraction_part;
+
+    printf("%lf\n", number);
+}
+
+bool is_little_endian()
+{
+    uint16_t number = 0x1;
+    char *numPtr = (char *)&number;
+    return (numPtr[0] == 1);
+}
+
+void reverse_buffer(unsigned char *buffer, int size)
+{
+    if (is_little_endian())
+    {
+        int start = 0;
+        int end = size - 1;
+        while (start < end)
+        {
+            unsigned char temp = buffer[start];
+            buffer[start] = buffer[end];
+            buffer[end] = temp;
+            start++;
+            end--;
+        }
+    }
 }
 
 void checkError(int rs, char *msg)
@@ -99,11 +169,11 @@ int main(int argc, char const *argv[])
 
     if (strcmp(argv[2], "-s") == 0)
     {
-        precision = 32;
+        precision = SHORT;
     }
     else if (strcmp(argv[2], "-d") == 0)
     {
-        precision = 64;
+        precision = LONG;
     }
     else
     {
@@ -120,17 +190,21 @@ int main(int argc, char const *argv[])
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
     {
 
-        if (precision == 32)
+        double ieee = 1.0;
+        reverse_buffer(buffer, precision);
+        if (precision == SHORT)
         {
-            to_convert.number = *((uint32_t *)buffer); // Cast and dereference to read out of the buffer, I think?
+            memcpy(&to_convert.number, buffer, SHORT);
+            ieee = ibm32_to_ieee(to_convert);
+            print_ibm_float_decimal(to_convert, precision);
         }
         else
         {
+            memcpy(&to_convert.number, buffer, LONG);
             to_convert.number = *((uint64_t *)buffer);
+            ieee = ibm64_to_ieee(to_convert);
         }
-
-        double iee = ibm_to_ieee(to_convert, precision);
-        printf("%lf\n", iee);
+        printf("%lf\n", ieee);
     }
 
     if (ferror(file))
