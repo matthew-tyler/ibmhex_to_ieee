@@ -29,10 +29,14 @@ int main(int argc, char const *argv[])
         exit(0);
     }
 
-    int file_descriptor = open(argv[1], O_RDONLY);
-    checkError(file_descriptor, "Failed to open file");
+    FILE *file = fopen(argv[1], "rb"); // Open a binary file for reading
+    if (file == NULL)
+    {
+        printf("Failed to open file\n");
+        return 1;
+    }
 
-    int precision;
+    int precision = 0;
 
     if (strcmp(argv[2], "-s") == 0)
     {
@@ -48,5 +52,19 @@ int main(int argc, char const *argv[])
         exit(0);
     }
 
+    unsigned char buffer[precision];
+
+    size_t bytesRead;
+
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
+    {
+    }
+
+    if (ferror(file))
+    {
+        printf("Error reading from file\n");
+    }
+
+    fclose(file);
     return 0;
 }
