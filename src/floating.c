@@ -41,22 +41,23 @@
  *
  *                                     number
  *                         |------------------------------------------------------------------------|
- *                         |                                 64 bits                                 |
+ *                         |                                 64 bits                                |
  *                         |------------------------------------------------------------------------|
  *
- *                                     struct
+ *
  *                         |------------------------------------------------------------------------|
  *                         | 1 bit | 7 bits |           24 bits            |         32 bits        |
- *                         |-------|--------|-----------------------------|------------------------|
- *                         | sign  |exponent|          fraction           |      Not used in struct|
+ *                         |-------|--------|-----------------------------|-------------------------|
+ *                         | sign  |exponent|          fraction           |      Not used in short  |
  *                         |------------------------------------------------------------------------|
  *
- *                               long_fraction
+ *
  *                         |------------------------------------------------------------------------|
- *                         | 8 bits |                        56 bits                                 |
- *                         |--------|----------------------------------------------------------------|
- *                         |Not used|                         long_fraction                          |
+ *                         | 1 bit | 7 bits |           56 bits                                     |
+ *                         |-------|--------|-------------------------------------------------------|
+ *                         |lsign |lexponent|         lfraction                                     |
  *                         |------------------------------------------------------------------------|
+ *
  *
  */
 typedef union
@@ -64,11 +65,16 @@ typedef union
     uint64_t number; // Holds 64bits. Set this value with the raw binary stream.
     struct
     {
-        uint32_t fraction : 24;  // The fraction of a Short IBM float
-        uint8_t exponent : 7;    // The exponent and sign bit are the same for both short and long.
-        uint8_t sign : 1;        // Same for both. 0 for postive, 1 for negative.
-    } __attribute__((packed));   // For the compiler to not add any padding. Should work for gcc, might need to add more?
-    uint64_t long_fraction : 56; // the fraction of a Long IBM float
+        uint32_t fraction : 24; // The fraction of a Short IBM float
+        uint8_t exponent : 7;   // The exponent of the short ibm
+        uint8_t sign : 1;       // Short sign. 0 for postive, 1 for negative.
+    } __attribute__((packed));  // For the compiler to not add any padding. Should work for gcc, might need to add more?
+    struct
+    {
+        uint64_t long_fraction : 56; // the fraction of a Long IBM float
+        uint8_t long_exponent : 7;   // exponent for a long ibm
+        uint8_t long_sign : 1;       // exponent for al ong sign
+    } __attribute__((packed));
 
 } IBM_FLOAT;
 
@@ -110,8 +116,8 @@ double ibm32_to_ieee(IBM_FLOAT num)
  */
 double ibm64_to_ieee(IBM_FLOAT num)
 {
-    int exponent = ((num.exponent - EXPONENT_BIAS) * BASE16_TO_BASE2) - LONG_WIDTH;
-    double ieenum = ldexp(num.long_fraction, exponent) * pow(-1, num.sign);
+    int exponent = ((num.long_exponent - EXPONENT_BIAS) * BASE16_TO_BASE2) - LONG_WIDTH;
+    double ieenum = ldexp(num.long_fraction, exponent) * pow(-1, num.long_sign);
     return ieenum;
 }
 
