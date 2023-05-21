@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-lm -I.
+CFLAGS= -Wall -lm -I.
 DEPS =
 OBJ = floating.o
 BIN_DIR = bin
