@@ -26,7 +26,7 @@
  * |------------------------ IBM_FLOAT Union Representation ------------------------|
  *
  *
- *  For the purposes of conversion one union is used to represent both single prescision (IBM Short)
+ *  For the purposes of conversion one union is used to represent both single precision (IBM Short)
  *  and double precision (IBM Long) formats.
  *
  *  The data type can be used by setting the number field with either 32 or 64 bits, the sign and
@@ -68,7 +68,7 @@ typedef union
     {
         uint32_t fraction : 24; // The fraction of a Short IBM float
         uint8_t exponent : 7;   // The exponent of the short ibm
-        uint8_t sign : 1;       // Short sign. 0 for postive, 1 for negative.
+        uint8_t sign : 1;       // Short sign. 0 for positive, 1 for negative.
     } __attribute__((packed));  // For the compiler to not add any padding. Should work for gcc, might need to add more?
     struct
     {
@@ -105,7 +105,7 @@ typedef union
 double ibm32_to_ieee(IBM_FLOAT num)
 {
     int exponent = ((num.exponent - EXPONENT_BIAS) * BASE16_TO_BASE2) - SHORT_WIDTH;
-    double ieenum = ldexp(num.fraction, exponent) * pow(-1, num.sign); // ldexp is apparently a better way to do x * 2^n
+    double ieenum = lde xp(num.fraction, exponent) * pow(-1, num.sign); // ldexp is apparently a better way to do x * 2^n
     return ieenum;
 }
 
@@ -214,7 +214,7 @@ void reverse_buffer(unsigned char *buffer, int size)
  *
  *  Not currently in use, can be used to check if ldexp doesn't work.
  *
- *  @brief  Checks the response and pritns errno with a message.
+ *  @brief  Checks the response and prints errno with a message.
  *  @param rs   The response from a function, exits with this status
  *  @param msg  A message to tack on
  */
@@ -278,8 +278,8 @@ int main(int argc, char const *argv[])
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
     {
 
-        double ieee = 1.0;
-        // reverse_buffer(buffer, precision);
+        float ieee = 1.0;
+        reverse_buffer(buffer, precision);
         if (precision == SHORT)
         {
             memcpy(&to_convert.number, buffer, SHORT);
@@ -300,7 +300,7 @@ int main(int argc, char const *argv[])
             fwrite(&ieee, sizeof(double), 1, bin_file);
             // TONY'S TESTING ENDS
         }
-        printf("%lf\n", ieee);
+        printf("%f\n", ieee);
     }
 
     // TONY'S TESTING BEGINS

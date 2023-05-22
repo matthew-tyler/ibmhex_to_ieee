@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "limits.h": "c",
-        "fcntl.h": "c"
+        "fcntl.h": "c",
+        "cmath": "cpp"
     }
 }
