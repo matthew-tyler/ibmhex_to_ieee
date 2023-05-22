@@ -60,6 +60,7 @@
  *
  *
  */
+ #pragma pack(push, 1)
 typedef union
 {
     uint64_t number; // Holds 64bits. Set this value with the raw binary stream.
@@ -77,6 +78,7 @@ typedef union
     } __attribute__((packed));
 
 } IBM_FLOAT;
+#pragma pack(pop)
 
 /**********************************************
  *          ibm32_to_ieee
@@ -264,6 +266,15 @@ int main(int argc, char const *argv[])
 
     size_t bytesRead;
 
+    // TONY'S TESTING BEGINS
+    char string[30];
+    printf("Enter name of file to write to: ");
+    scanf("%s", string);
+    char* ext = ".bin";
+    strcat(string, ext);
+    FILE* bin_file = fopen(string, "wb");
+    // TONY'S TESTING ENDS
+
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
     {
 
@@ -274,15 +285,27 @@ int main(int argc, char const *argv[])
             memcpy(&to_convert.number, buffer, SHORT);
             ieee = ibm32_to_ieee(to_convert);
             // print_ibm_float_decimal(to_convert, precision);
+            
+            // TONY'S TESTING BEGINS
+            fwrite(&ieee, sizeof(float), 1, bin_file);
+            // TONY'S TESTING ENDS
         }
         else
         {
             memcpy(&to_convert.number, buffer, LONG);
             to_convert.number = *((uint64_t *)buffer);
             ieee = ibm64_to_ieee(to_convert);
+            
+            // TONY'S TESTING BEGINS
+            fwrite(&ieee, sizeof(double), 1, bin_file);
+            // TONY'S TESTING ENDS
         }
         printf("%f\n", ieee);
     }
+
+    // TONY'S TESTING BEGINS
+    fclose(bin_file);
+    // TONY'S TESTING ENDS
 
     if (ferror(file))
     {
