@@ -264,6 +264,10 @@ int main(int argc, char const *argv[])
 
     size_t bytesRead;
 
+    // TONY'S TESTING BEGINS
+    FILE* bin_file = fopen("test.bin", "wb");
+    // TONY'S TESTING ENDS
+
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
     {
 
@@ -274,15 +278,27 @@ int main(int argc, char const *argv[])
             memcpy(&to_convert.number, buffer, SHORT);
             ieee = ibm32_to_ieee(to_convert);
             // print_ibm_float_decimal(to_convert, precision);
+            
+            // TONY'S TESTING BEGINS
+            fwrite(&ieee, sizeof(float), 1, bin_file);
+            // TONY'S TESTING ENDS
         }
         else
         {
             memcpy(&to_convert.number, buffer, LONG);
             to_convert.number = *((uint64_t *)buffer);
             ieee = ibm64_to_ieee(to_convert);
+            
+            // TONY'S TESTING BEGINS
+            fwrite(&ieee, sizeof(double), 1, bin_file);
+            // TONY'S TESTING ENDS
         }
         printf("%lf\n", ieee);
     }
+
+    // TONY'S TESTING BEGINS
+    fclose(bin_file);
+    // TONY'S TESTING ENDS
 
     if (ferror(file))
     {
