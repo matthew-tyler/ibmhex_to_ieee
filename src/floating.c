@@ -60,6 +60,7 @@
  *
  *
  */
+ #pragma pack(push, 1)
 typedef union
 {
     uint64_t number; // Holds 64bits. Set this value with the raw binary stream.
@@ -77,6 +78,7 @@ typedef union
     } __attribute__((packed));
 
 } IBM_FLOAT;
+#pragma pack(pop)
 
 /**********************************************
  *          ibm32_to_ieee
@@ -272,7 +274,7 @@ int main(int argc, char const *argv[])
     {
 
         double ieee = 1.0;
-        reverse_buffer(buffer, precision);
+        // reverse_buffer(buffer, precision);
         if (precision == SHORT)
         {
             memcpy(&to_convert.number, buffer, SHORT);
