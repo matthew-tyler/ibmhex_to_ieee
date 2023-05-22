@@ -103,7 +103,7 @@ typedef union
 double ibm32_to_ieee(IBM_FLOAT num)
 {
     int exponent = ((num.exponent - EXPONENT_BIAS) * BASE16_TO_BASE2) - SHORT_WIDTH;
-    double ieenum = lde xp(num.fraction, exponent) * pow(-1, num.sign); // ldexp is apparently a better way to do x * 2^n
+    double ieenum = ldexp(num.fraction, exponent) * pow(-1, num.sign); // ldexp is apparently a better way to do x * 2^n
     return ieenum;
 }
 
@@ -267,7 +267,7 @@ int main(int argc, char const *argv[])
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
     {
 
-        float ieee = 1.0;
+        double ieee = 1.0;
         reverse_buffer(buffer, precision);
         if (precision == SHORT)
         {
