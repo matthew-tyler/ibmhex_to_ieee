@@ -5,7 +5,7 @@ OBJ = floating.o
 BIN_DIR = bin
 SRC_DIR = src
 INPUT_DIR = testdata
-INPUT_FILE = testIBMSingle.bin
+INPUT_FILE = ibm_floats.bin
 PRECISION = -s
 DEBUG_FLAGS = -g -O0 -Wall
 
