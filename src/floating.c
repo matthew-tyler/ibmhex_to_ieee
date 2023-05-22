@@ -267,7 +267,12 @@ int main(int argc, char const *argv[])
     size_t bytesRead;
 
     // TONY'S TESTING BEGINS
-    FILE* bin_file = fopen("test.bin", "wb");
+    char string[30];
+    printf("Enter name of file to write to: ");
+    scanf("%s", string);
+    char* ext = ".bin";
+    strcat(string, ext);
+    FILE* bin_file = fopen(string, "wb");
     // TONY'S TESTING ENDS
 
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
