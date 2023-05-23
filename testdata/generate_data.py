@@ -7,13 +7,12 @@ output = open('output.txt', 'w')
 
 # For tests in our ranges,
 for i in range(1, 101):
-    # Write the binary bytes to the binary file...
-    binary.write(ibm.ieee2ibm(i))   
-    # ...and the expected output to the output file.
-    output.write(str(ibm.IBMFloat.from_float(i)) + "\n") 
-for i in np.arange(1, 1000, 7.6543):
-    binary.write(ibm.ieee2ibm(i))
+    # Write the binary bytes to the binary file and the expected output to the output file.
     output.write(str(ibm.IBMFloat.from_float(i)) + "\n")
+    binary.write(ibm.ieee2ibm(ibm.IBMFloat.from_float(i))) 
+for i in np.arange(1, 1000, 7.6543):
+    output.write(str(ibm.IBMFloat.from_float(i)) + "\n")
+    binary.write(ibm.ieee2ibm(ibm.IBMFloat.from_float(i))) 
 
 # Close each file to ensure everything is saved correctly.
 binary.close()
