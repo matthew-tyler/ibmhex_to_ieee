@@ -16,7 +16,7 @@ def read_ieee_floats_from_binary_file(filename):
     return floats
 
 # Example usage
-input_file = 'ieee_floats2.bin'
+input_file = 'd_to_s.bin'
 ieee_floats = read_ieee_floats_from_binary_file(input_file)
 #print(ieee_floats)
 for f in ieee_floats:
