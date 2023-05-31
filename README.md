@@ -9,6 +9,7 @@ Date: 24/05/23
 
 
 ## Overview
+
 Our primary implementation is floating.c located in /src. However, we found that floating.c was producing small rounding errors, and so we wrote a python implementation of Floating Point that we could use to test floating.c against. Our python implementation is the floating_point_conv.py file in /Python_Implementation.
 
 
@@ -34,14 +35,23 @@ To build and run the program using the provided Makefile, you can use the follow
 3. Run the program by typing:
 
     ```bash
-    ./bin/floating  [path/to/input] [-s or -d]
+    ./bin/floating 
     ```
 
-For example with our program and test data,
 
-```bash
-./bin/floating  ./testdata/ibm_floats.bin -s
-```
+## C Implementation & Overflows - Matt Tyler
+
+The basic approach to this is to take the formula for representing both IBM and IEEE and convert from one to the other. Using a bit of C magic, we can access the bit fields as required nice and cleanly using a union. The conversion itself is very straightforward, simply converting each field back to decimal, then setting the fraction in an empty double and using ldexp to load the new exponent against that fraction. This way, the hard work is done by someone else, which is the best way to code.
+
+Currently overflows are simply set to 0, but this can be easily changed.
+
+The program assumes the endianness of the file to be big endian, this is because of the IBM /360 systems it's meant to have been coming from. It also will determine the endianness of the system it is running on and handle correctly. 
+
+There is some challenge with regard to portability in the C implementation, as it was having some issues on windows, possibly due to struct packing. I have attempted to address this with the pragma, but not been able to confirm if it worked.
+
+Finally being able to confirm the accuracy has been a problem. The output is different to the test files we're able to generate, however the test files were generated with a python library.
+
+If the python library took a similar approach however did its math using arbitrary precision integers, it would have a different accuracy up until it handles the fraction. This could be the source of differences, however I am unable to confirm which is more accurate. 
 
 ## Generating Test Data - Will Frame
 
