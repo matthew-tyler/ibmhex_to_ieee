@@ -139,7 +139,7 @@ double ibm64_to_ieee(IBM_FLOAT num)
  *  into IEEE.
  *
  *
- *  @brief Converts and prints ibm floats. Might be less accurate than other appraoch due to loss of precision
+ *  @brief Converts and prints ibm floats. Might be less accurate than other approach due to loss of precision
  *  @param  f the IBM_FLOAT to print
  */
 void print_ibm_float_decimal(IBM_FLOAT f, int precision)
