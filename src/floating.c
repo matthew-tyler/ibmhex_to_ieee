@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdbool.h>
+#include <float.h>
 
 #define EXPONENT_BIAS 64
 #define SHORT_WIDTH 24
@@ -60,7 +61,7 @@
  *
  *
  */
- #pragma pack(push, 1)
+#pragma pack(push, 1) // Should hopefully cover struct packing on windows ...
 typedef union
 {
     uint64_t number; // Holds 64bits. Set this value with the raw binary stream.
@@ -205,113 +206,117 @@ void reverse_buffer(unsigned char *buffer, int size)
     }
 }
 
-/**********************************************
- *          check_error
- **********************************************
- *
- *  Borrowed from the 204 assignment, I think Iain wrote it?
- *  Just a nice way to check errno, print and exit.
- *
- *  Not currently in use, can be used to check if ldexp doesn't work.
- *
- *  @brief  Checks the response and prints errno with a message.
- *  @param rs   The response from a function, exits with this status
- *  @param msg  A message to tack on
- */
-void check_error(int rs, char *msg)
-{
-    if (rs < 0)
-    {
-        perror(msg);
-        exit(rs);
-    }
-}
-
 int main(int argc, char const *argv[])
 {
 
-    if (argc != 3)
+    char input_filename[30];
+    char output_filename[30];
+    char input_type[2];
+    char output_type[2];
+
+    printf("Enter name of file to read from: ");
+    scanf("%29s", input_filename);
+
+    FILE *input_file = fopen(input_filename, "rb"); // open for reading in binary mode
+    if (input_file == NULL)
     {
-        printf("Usage: floating [FILE] [-s] or [-d]\n");
-        exit(0);
+        perror("Error opening input file");
+        return EXIT_FAILURE;
     }
 
-    FILE *file = fopen(argv[1], "rb");
+    printf("Enter input type ('s' for single point or 'd' for double point): ");
+    scanf("%1s", input_type);
 
-    if (file == NULL)
+    int input_precision = 0;
+
+    if (strcmp(input_type, "s") == 0)
     {
-        printf("Failed to open file\n");
-        return 1;
+        input_precision = SHORT;
     }
-
-    int precision = 0;
-
-    if (strcmp(argv[2], "-s") == 0)
+    else if (strcmp(input_type, "d") == 0)
     {
-        precision = SHORT;
-    }
-    else if (strcmp(argv[2], "-d") == 0)
-    {
-        precision = LONG;
+        input_precision = LONG;
     }
     else
     {
-        printf("Usage: floating [FILE] [-s] or [-d]\n");
-        exit(0);
+        perror("Error, enter s or d");
+        return EXIT_FAILURE;
+    }
+
+    printf("Enter name of output file: ");
+    scanf("%29s", output_filename);
+
+    FILE *output_file = fopen(output_filename, "wb");
+    if (output_file == NULL)
+    {
+        perror("Error opening output file");
+        fclose(input_file);
+        return EXIT_FAILURE;
+    }
+
+    printf("Enter output type ('s' for single point or 'd' for double point): ");
+    scanf("%1s", output_type);
+
+    int output_precision = 0;
+
+    if (strcmp(output_type, "s") == 0)
+    {
+        output_precision = SHORT;
+    }
+    else if (strcmp(output_type, "d") == 0)
+    {
+        output_precision = LONG;
+    }
+    else
+    {
+        perror("Error, enter s or d");
+        return EXIT_FAILURE;
     }
 
     IBM_FLOAT to_convert;
-
-    unsigned char buffer[precision];
-
+    unsigned char buffer[input_precision];
     size_t bytesRead;
 
-    // TONY'S TESTING BEGINS
-    char string[30];
-    printf("Enter name of file to write to: ");
-    scanf("%s", string);
-    char* ext = ".bin";
-    strcat(string, ext);
-    FILE* bin_file = fopen(string, "wb");
-    // TONY'S TESTING ENDS
-
-    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), input_file)) > 0)
     {
 
-        float ieee = 1.0;
-        reverse_buffer(buffer, precision);
-        if (precision == SHORT)
+        double ieee = 1.0;
+        reverse_buffer(buffer, input_precision);
+
+        if (input_precision == SHORT)
         {
             memcpy(&to_convert.number, buffer, SHORT);
             ieee = ibm32_to_ieee(to_convert);
-            // print_ibm_float_decimal(to_convert, precision);
-            
-            // TONY'S TESTING BEGINS
-            fwrite(&ieee, sizeof(float), 1, bin_file);
-            // TONY'S TESTING ENDS
         }
         else
         {
             memcpy(&to_convert.number, buffer, LONG);
-            to_convert.number = *((uint64_t *)buffer);
             ieee = ibm64_to_ieee(to_convert);
-            
-            // TONY'S TESTING BEGINS
-            fwrite(&ieee, sizeof(double), 1, bin_file);
-            // TONY'S TESTING ENDS
         }
-        printf("%f\n", ieee);
+
+        if (output_precision == SHORT)
+        {
+
+            if (ieee == HUGE_VAL || ieee > FLT_MAX || ieee < -FLT_MAX)
+            {
+                ieee = 0;
+            }
+
+            float float_ieee = (float)ieee;
+            fwrite(&float_ieee, sizeof(float), 1, output_file);
+        }
+        else
+        {
+            if (ieee == HUGE_VAL)
+            {
+                ieee = 0;
+            }
+            fwrite(&ieee, sizeof(double), 1, output_file);
+        }
     }
 
-    // TONY'S TESTING BEGINS
-    fclose(bin_file);
-    // TONY'S TESTING ENDS
+    fclose(input_file);
+    fclose(output_file);
 
-    if (ferror(file))
-    {
-        printf("Error reading from file\n");
-    }
-
-    fclose(file);
-    return 0;
+    return EXIT_SUCCESS;
 }
