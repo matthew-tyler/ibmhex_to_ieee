@@ -41,7 +41,7 @@ To build and run the program using the provided Makefile, you can use the follow
 
 ## C Implementation & Overflows - Matt Tyler
 
-The basic approach to this is to take the formula for representing both IBM and IEEE and convert from one to the other. Using a bit of C magic, we can access the bit fields as required nice and cleanly using a union. The conversion itself is very straightforward, simply converting each field back to decimal, then setting the fraction in an empty double and using ldexp to load the new exponent against that fraction. This way, the hard work is done by someone else, which is the best way to code.
+The basic approach to this is to take the formula for representing both IBM and IEEE and convert from one to the other. Using a bit of C magic, we can access the bit fields as required nice and cleanly using a union. The conversion itself is very straightforward, simply converting each field back to decimal, then setting the fraction in an empty double and using ldexp to load the new exponent against that fraction. This way, the hard work is done by someone else, which is the best way to code. This is in contrast to the print method, which was the original approach I took. This works as well, but I believe it is less accurate due to entirely relying on floating point maths. 
 
 Currently overflows are simply set to 0, but this can be easily changed.
 
