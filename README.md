@@ -80,6 +80,10 @@ import os
 
 I used ChatGPT to help with a lot of the nitty-gritty python nonsense, such as how to turn a hex string into a binary string. And I also used ChatGPT to write the documentation for the program.
 
+
+## Extra Testing and Proofing - Rosie Bicknell
+To test how the program worked on different machines and environments I did extra testing and general QC of the implementations
+
 ## Challenges
 
 We weren't able to find any resources online where you can turn a hex or binary string, which represents an IBM float, into its corresponding decimal value, so we had to do those conversions by hand.
