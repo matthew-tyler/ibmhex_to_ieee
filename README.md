@@ -82,7 +82,9 @@ I used ChatGPT to help with a lot of the nitty-gritty python nonsense, such as h
 
 
 ## Extra Testing and Proofing - Rosie Bicknell
-To test how the program worked on different machines and environments I did extra testing and general QC of the implementations
+To test how the program worked on different machines and environments I did extra testing and general QC of the implementations.  
+Notes:  
+Although the C and Python programs convert in an equivilant way, the c implementation takes the endianess of the system into account wheras the python implementation will always be big endian
 
 ## Challenges
 
