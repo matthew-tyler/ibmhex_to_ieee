@@ -84,7 +84,8 @@ I used ChatGPT to help with a lot of the nitty-gritty python nonsense, such as h
 ## Extra Testing and Proofing - Rosie Bicknell
 To test how the program worked on different machines and environments I did extra testing and general QC of the implementations.  
 Notes:  
-Although the C and Python programs convert in an equivilant way, the c implementation takes the endianess of the system into account wheras the python implementation will always be big endian
+Although the C and Python programs convert in an equivilant way, the c implementation takes the endianess of the system into account wheras the python implementation will always be big endian.  
+The equivalency can be seen in the directory *testing_comparison* which runs the output from the generated data through the c and python implementations on a little endian machine and runs the python generated bin file through *bin_to_floats.py* which interprets as big endian and runs the c generated file through *bin_to_floats_le.py* which interprets as little endian. The result is the same as seen by running diff on the generated txt files.
 
 ## Challenges
 
